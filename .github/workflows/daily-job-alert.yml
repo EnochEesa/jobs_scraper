@@ -1,0 +1,33 @@
+# .github/workflows/daily-job-alert.yml
+name: Daily Job Alert
+
+on:
+  schedule:
+    # 04:30 UTC == 10:00 IST daily
+    - cron: '30 4 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run job scraper
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.GMAIL_USER }}
+        run: |
+          python jobs_scraper.py
